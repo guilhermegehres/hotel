@@ -36,22 +36,24 @@ Listas com filtro query string
     * Switch what GET method will be returned
     */
     public function dispatcher(Request $r, $id = null){
+        
         $orderBy = $r->get("orderBy");
 
         $orderType = $r->get("orderType");
 
         if(empty($id)){
-            return $this->list($orderBy, $orderType);
+            return $this->list($r, $orderBy, $orderType);
         }
 
-        return $this->get($id);
+        return $this->get($r, $id);
     }
 
     /*
      * Get model list
      * @return Model::all()
      */
-    public function list($orderBy = null, $orderType = null){
+    public function list(Request $r, $orderBy = null, $orderType = null){
+        
         try{
             $return;
             if(!empty($orderBy)){
@@ -76,7 +78,7 @@ Listas com filtro query string
      * Get model single
      * @return Model::find($id)
      */
-    public function get($id){
+    public function get($r, $id){
         try{
             return response($this->getClass()::find($id), 200)
                 ->header("Content-Type", "text/json");
@@ -123,7 +125,7 @@ Listas com filtro query string
             $class = $this->getClass();
             $class::destroy($id);
             $msg = new Message();
-            return response(json_encode($msg->getSuccessDelete(), true), 200)
+            return response(json_encode($msg->getSuccessDelete()), 200)
                     ->header('Content-Type', 'text/json');
         }
         catch( \Exception $e){

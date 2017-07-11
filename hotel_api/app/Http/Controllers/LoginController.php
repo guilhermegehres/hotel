@@ -44,6 +44,8 @@ class LoginController extends Controller
 
         $user->save();
 
+        $user->user_password = null;
+
         return response(json_encode($user, true), 200)
                         ->header('Content-Type', 'text/json');
     }

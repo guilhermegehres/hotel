@@ -12,16 +12,16 @@ class Message
 
     private $successDelete = [
         "message" => "Deletado com sucesso",
-        "kind" => "err"
+        "kind" => "success"
     ];
 
     private $customMessage;
 
     public function getInternalError(){
-        return json_encode($this->internalError);
+        return $this->internalError;
     }
     public function getSuccessDelete(){
-        return json_encode($this->successDelete);
+        return $this->successDelete;
     }
 
     public function setCustomMessage($message){
