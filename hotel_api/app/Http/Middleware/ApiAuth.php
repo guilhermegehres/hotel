@@ -28,6 +28,7 @@ class ApiAuth
             return response(json_encode($this->msg->getCustomMessage("err", "Token inválido")), 400)
             ->header("Content-type", "text/json");
         }
+        $user->user_password = null;
         $request->merge(array("user" => $user));
         return $next($request);
     }

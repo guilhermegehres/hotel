@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Optional;
 use App\Message;
+use App\Library\Constantes;
 
 abstract class CrudAbstractController extends Controller
 {
@@ -20,7 +21,6 @@ Listas com filtro query string
 =====================================================
 */
 
-
     /*
      * Get class reference
      * @return Model::class 
@@ -33,6 +33,11 @@ Listas com filtro query string
     public abstract function validateFields(Request $r);
 
     /*
+    * Get list by user type, get from ApiCrud Middleware
+    */
+    public abstract function listByUser(Request $r, $query);
+
+    /*
     * Switch what GET method will be returned
     */
     public function dispatcher(Request $r, $id = null){
@@ -42,31 +47,45 @@ Listas com filtro query string
         $orderType = $r->get("orderType");
 
         if(empty($id)){
-            return $this->list($r, $orderBy, $orderType);
+            if($r->input("user")->user_type == Constantes::USER_TYPE_ADMIN){
+                return $this->list($this->getOrderQuery($orderBy, $orderType));
+            }
+            return $this->listByUser($r, $this->getOrderQuery($orderBy, $orderType));
         }
 
         return $this->get($r, $id);
     }
 
     /*
+     * Get an model instance query ordered 
+     */
+    public function getOrderQuery($orderBy = null, $orderType = null){
+        if(!empty($orderBy)){
+            if(!empty($orderType)){
+                return $this->getClass()::orderBy($orderBy, $orderType);                    
+            }else{
+                return $this->getClass()::orderBy($orderBy);
+            }
+        }
+        $class = $this->getClass();
+        return new $class;
+    }
+
+    /*
      * Get model list
      * @return Model::all()
      */
-    public function list(Request $r, $orderBy = null, $orderType = null){
-        
+    public function list($list){
         try{
-            $return;
-            if(!empty($orderBy)){
-                if(!empty($orderType)){
-                    $return = $this->getClass()::orderBy($orderBy, $orderType)->get();                    
-                }else{
-                    $return = $this->getClass()::orderBy($orderBy)->get();
-                }
-            }else{
-                $return = $this->getClass()::all();
+            $list = $list->get();
+            if(count($list) == 0){
+                $err = new Message();
+                return response(json_encode($err->getCustomMessage("err", 'Nenhum resultado para consulta')), 404)
+                    ->header('Content-Type', 'text/json');    
             }
-            return response(json_encode($return), 200)
+            return response(json_encode($list), 200)
                 ->header('Content-Type', 'text/json');
+
         }catch(\Exception $e){
             $err = new Message();
             return response($err->getInternalError(), 500)
@@ -80,7 +99,13 @@ Listas com filtro query string
      */
     public function get($r, $id){
         try{
-            return response($this->getClass()::find($id), 200)
+            $query = $this->getClass()::find($id);
+            if(empty($query)){
+                $err = new Message();
+                return response(json_encode($err->getCustomMessage("err", 'Nenhum resultado para consulta')), 404)
+                    ->header('Content-Type', 'text/json');    
+            }
+            return response($query, 200)
                 ->header("Content-Type", "text/json");
         }catch(\Exception $e){
             $err = new Message();

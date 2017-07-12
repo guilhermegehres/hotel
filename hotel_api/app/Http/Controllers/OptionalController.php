@@ -23,6 +23,22 @@ class OptionalController extends CrudAbstractController
     public function getClass(){
         return Optional::class;
     }
+
+    /*
+     * @override
+     */
+    public function listByUser(Request $r, $query){
+        try{
+            return response(json_encode($query), 200)
+                ->header('Content-Type', 'text/json');
+        }catch(\Exception $e){
+            $err = new Message();
+            return response($err->getInternalError(), 500)
+                ->header('Content-Type', 'text/json');
+        }
+    }
+
+
     
     
     /*
