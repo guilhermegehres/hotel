@@ -38,6 +38,12 @@ Listas com filtro query string
     public abstract function listByUser(Request $r, $query);
 
     /*
+    * Validate if an user can get de resource by id of path param
+    * used on /resource/{id} routes
+    */
+    public abstract function userCanGetById(Request $r, $id);
+
+    /*
     * Switch what GET method will be returned
     */
     public function dispatcher(Request $r, $id = null){
@@ -52,8 +58,13 @@ Listas com filtro query string
             }
             return $this->listByUser($r, $this->getOrderQuery($orderBy, $orderType));
         }
-
-        return $this->get($r, $id);
+        if($this->userCanGetById($r, $id)){
+            return $this->get($r, $id);
+        }
+        
+        $err = new Message();
+        return response(json_encode($err->getCustomMessage("err", "Este endpoint não está autorizado para seu usuário")), 401)
+                ->header("Content-type", "text/json");
     }
 
     /*
@@ -128,6 +139,7 @@ Listas com filtro query string
             $valid = $this->validateFields($r);
             if($valid === true){
                 $model->fill(json_decode($r->getContent(), true));
+
                 $model->save();
                 return response(json_encode($model), 200)
                         ->header('Content-Type', 'text/json');

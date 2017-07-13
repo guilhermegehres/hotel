@@ -8,15 +8,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use Notifiable;
+
     protected $table = 'user';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'name', 'email', 'password',
+        "user_name" ,
+        "user_email",
+        "user_password",
+        "user_type" ,
+        "user_permission"
     ];
 
     /**

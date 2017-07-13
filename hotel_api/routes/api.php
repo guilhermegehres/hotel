@@ -17,6 +17,24 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::middleware(['api'])->group(function () {
+    //rotas para que precisa de token
+
+    Route::get("/user/{id}", ['uses' => 'UserController@dispatcher']);
+    Route::get("/reservationStatus", ['uses' => 'ReservationStatusController@dispatcher']);
+    Route::get("/reservation", ['uses' => 'ReservationController@dispatcher']);
+    Route::post("/reservation", ['uses' => 'ReservationController@store']);
+});
+
+Route::middleware(['api', 'admin'])->group(function () {
+    Route::get("/user", ['uses' => 'UserController@dispatcher']);      
+    
+});
+
+
+Route::post("/user", ['uses' => 'UserController@store']);
+
 Route::post("/login", ['uses' => 'LoginController@login']);
 
 Route::post("/optional", ['uses' => 'OptionalController@store']);

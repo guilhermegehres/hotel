@@ -39,7 +39,7 @@ class LoginController extends Controller
             return response(json_encode($this->msg->getCustomMessage("err", "Login ou senha inválidos"), true), 400)
                         ->header('Content-Type', 'text/json');
         }
-
+        $user->user_token = null;
         $user->user_token = $this->jwtM->generateToken($user);
 
         $user->save();
